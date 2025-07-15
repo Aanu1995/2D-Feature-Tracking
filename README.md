@@ -6,14 +6,19 @@
 
 This project implements a comprehensive 2D feature tracking system using OpenCV as part of the Sensor Fusion Nanodegree program. The system evaluates various combinations of keypoint detectors and descriptors to determine the optimal configuration for vehicle detection and tracking in autonomous driving scenarios.
 
-The measurements were taken on a laptop with the following specifications:
-Model Name: MacBook Pro
-Model Identifier: Mac15,3
-Chip: Apple M3
-Total Number of Cores: 8 (4 performance and 4 efficiency)
-Memory: 16 GB
+## Hardware Specifications
 
-Also, OpenCV version 4.11.0 was used
+The measurements were taken on a laptop with the following specifications:
+
+- **Model Name**: MacBook Pro
+- **Model Identifier**: Mac15,3
+- **Chip**: Apple M3
+- **Total Number of Cores**: 8 (4 performance and 4 efficiency)
+- **Memory**: 16 GB
+
+## Software Environment
+
+- **OpenCV Version**: 4.11.0
 
 ## Objective
 
