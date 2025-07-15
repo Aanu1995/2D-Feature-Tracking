@@ -6,6 +6,15 @@
 
 This project implements a comprehensive 2D feature tracking system using OpenCV as part of the Sensor Fusion Nanodegree program. The system evaluates various combinations of keypoint detectors and descriptors to determine the optimal configuration for vehicle detection and tracking in autonomous driving scenarios.
 
+The measurements were taken on a laptop with the following specifications:
+Model Name: MacBook Pro
+Model Identifier: Mac15,3
+Chip: Apple M3
+Total Number of Cores: 8 (4 performance and 4 efficiency)
+Memory: 16 GB
+
+Also, OpenCV version 4.11.0 was used
+
 ## Objective
 
 The primary objective is to build a robust feature tracking system that can:
@@ -91,24 +100,21 @@ Implemented comprehensive keypoint analysis across all 10 KITTI image sequences 
 
 The number of keypoints detected on the preceding vehicle across all 10 images for each detector:
 
-| Detector  | Total Keypoints | Avg per Image | Min | Max | Neighborhood Size Distribution |
-| --------- | --------------- | ------------- | --- | --- | ------------------------------ |
-| SHITOMASI | 1179            | 117.9         | 125 | 125 | Consistent 4x4 pixel regions   |
-| HARRIS    | 248             | 24.8          | 17  | 43  | Variable, mostly 6x6 regions   |
-| FAST      | 1491            | 149.1         | 149 | 152 | Small 3x3 to 7x7 regions       |
-| BRISK     | 2762            | 276.2         | 254 | 297 | Multi-scale 8x8 to 60x60       |
-| ORB       | 1161            | 116.1         | 92  | 130 | Oriented 7x7 to 31x31          |
-| AKAZE     | 1670            | 167.0         | 155 | 179 | Adaptive 4x4 to 25x25          |
-| SIFT      | 1386            | 138.6         | 132 | 159 | Scale-dependent 5x5 to 80x80   |
+| Detector  | Avg per Image | Min | Max | Neighborhood Size Distribution |
+| --------- | ------------- | --- | --- | ------------------------------ |
+| SHITOMASI | 118           | 111 | 125 | Consistent 4x4 pixel regions   |
+| HARRIS    | 25            | 14  | 43  | Variable, mostly 6x6 regions   |
+| FAST      | 149           | 138 | 156 | Small 3x3 to 7x7 regions       |
+| BRISK     | 271           | 250 | 293 | Multi-scale 8x8 to 60x60       |
+| ORB       | 115           | 91  | 129 | Oriented 7x7 to 31x31          |
+| AKAZE     | 166           | 154 | 175 | Adaptive 4x4 to 25x25          |
+| SIFT      | 137           | 121 | 156 | Scale-dependent 5x5 to 80x80   |
 
 **Key Observations:**
 
-- **BRISK** produces the highest number of keypoints (276.2 average) with the largest neighborhood sizes (8x8 to 60x60), making it suitable for scale-invariant applications
-- **HARRIS** generates the fewest keypoints (24.8 average) but with consistent neighborhood sizes, indicating reliable corner detection
-- **FAST** provides excellent keypoint density (149.1 average) with small, consistent neighborhoods (3x3 to 7x7), ideal for real-time applications
-- **SIFT** shows the widest range of neighborhood sizes (5x5 to 80x80), reflecting its scale-invariant nature
-- **ORB** demonstrates oriented neighborhoods (7x7 to 31x31) with rotation compensation
-- **AKAZE** and **SHITOMASI** show balanced performance with moderate neighborhood size distributions
+- **BRISK** produces the highest number of keypoints (271 average) with the largest neighborhood sizes (8x8 to 60x60), making it suitable for scale-invariant applications
+- **HARRIS** generates the fewest keypoints (25 average).
+- **FAST** provides excellent keypoint density (149.1 average)
 
 **Neighborhood Size Distribution Analysis:**
 
@@ -171,24 +177,24 @@ Based on comprehensive analysis of processing time, keypoint detection accuracy,
 ### 🥇 1st Place: FAST + BRIEF
 
 - **Average Processing Time**: 1.92ms
-- **Average Keypoints**: 149.1
-- **Average Matches**: 119.8
+- **Average Keypoints**: 149
+- **Average Matches**: 122
 - **Strengths**: Extremely fast processing, high keypoint density, excellent matching performance
 - **Use Case**: Real-time applications requiring high frame rates
 
 ### 🥈 2nd Place: FAST + ORB
 
 - **Average Processing Time**: 2.62ms
-- **Average Keypoints**: 149.1
-- **Average Matches**: 118.5
+- **Average Keypoints**: 149
+- **Average Matches**: 120
 - **Strengths**: Very fast processing, rotation-invariant, good matching accuracy
 - **Use Case**: Applications requiring rotation robustness with speed
 
 ### 🥉 3rd Place: FAST + BRISK
 
 - **Average Processing Time**: 2.20ms
-- **Average Keypoints**: 149.1
-- **Average Matches**: 97.6
+- **Average Keypoints**: 149
+- **Average Matches**: 100
 - **Strengths**: Fast processing, scale-invariant, robust binary descriptors
 - **Use Case**: Applications requiring scale robustness with good performance
 
@@ -196,14 +202,14 @@ Based on comprehensive analysis of processing time, keypoint detection accuracy,
 
 The recommendation is based on the following criteria:
 
-1. **Processing Speed**: FAST detector consistently outperforms all other detectors with sub-3ms processing times
+1. **Processing Speed**: FAST detector consistently outperforms all other detectors in processing times
 2. **Keypoint Density**: FAST provides excellent keypoint coverage on the vehicle region
 3. **Matching Accuracy**: BRIEF and ORB descriptors provide reliable matching with FAST detector
 
 **Why FAST + BRIEF is the Winner:**
 
 - Fastest overall processing time (1.92ms average)
-- Highest matching efficiency (119.8 matches)
+- Highest matching efficiency (122 matches)
 - Minimal computational overhead
 - Excellent for real-time vehicle tracking applications
 
