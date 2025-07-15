@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SIFT";
+        string detectorType = "FAST";
 
         //// Enable string-based selection based on detectorType -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
@@ -125,7 +125,7 @@ int main(int argc, const char *argv[])
         // -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "BRIEF"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+        string descriptorType = "BRIEF"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
 
         // push descriptors for current frame to end of data buffer
