@@ -17,257 +17,132 @@ The primary objective is to build a robust feature tracking system that can:
 
 ## Project Structure
 
-The project is organized into four main components:
+The project is organized into seven main components:
 
-### 1. Data Buffer Implementation
+### 1. Data Buffer Optimization
 
-- Implemented a ring buffer to efficiently manage image data
+- Implemented a vector-based ring buffer to efficiently manage image data
 - Optimized memory usage by maintaining only the necessary frames
 - Configured to hold 2 images simultaneously for frame-to-frame matching
 
 ### 2. Keypoint Detection
 
-Integrated and evaluated the following keypoint detectors:
+Implemented multiple keypoint detectors that are selectable by setting a string parameter:
 
-- **SHITOMASI** - Good Features to Track (Shi-Tomasi corner detector)
 - **HARRIS** - Harris corner detector
 - **FAST** - Features from Accelerated Segment Test
 - **BRISK** - Binary Robust Invariant Scalable Keypoints
 - **ORB** - Oriented FAST and Rotated BRIEF
 - **AKAZE** - Accelerated-KAZE features
 - **SIFT** - Scale-Invariant Feature Transform
+- **SHITOMASI** - Shi-Tomasi corner detector
 
-### 3. Descriptor Extraction & Matching
+### 3. Keypoint Removal
 
-Implemented descriptor extraction using:
+Implemented keypoint filtering to focus on the preceding vehicle region for collision detection evaluation:
 
-- **BRISK** - Binary Robust Invariant Scalable Keypoints
+- **ROI Definition**: Applied a bounding box around the preceding vehicle (cx=535, cy=180, w=180, h=150)
+- **Keypoint Filtering**: Removed all keypoints outside the defined rectangle using OpenCV Rect coordinates
+- **Targeted Processing**: Only keypoints within the vehicle region are used for descriptor extraction and matching
+
+### 4. Keypoint Descriptors
+
+Implemented multiple descriptor extraction methods selectable by setting a string parameter:
+
+- **BRISK** - Binary Robust Invariant Scalable Keypoints (baseline implementation)
 - **BRIEF** - Binary Robust Independent Elementary Features
 - **ORB** - Oriented FAST and Rotated BRIEF
 - **FREAK** - Fast Retina Keypoint
 - **AKAZE** - Accelerated-KAZE descriptors
 - **SIFT** - Scale-Invariant Feature Transform
 
-Matching algorithms:
+### 5. Descriptor Matching
 
-- **Brute Force (BF)** matcher with descriptor distance ratio of 0.8
-- **FLANN** (Fast Library for Approximate Nearest Neighbors) matcher
+Implemented multiple matching algorithms selectable by setting string parameters:
 
-### 4. Performance Evaluation
+**Matching Methods:**
 
-Comprehensive analysis of all detector-descriptor combinations based on:
+- **Brute Force (BF)** matcher - Exhaustive search for best matches
+- **FLANN** (Fast Library for Approximate Nearest Neighbors) matcher - Fast approximate matching
 
-- Processing time (keypoint detection + descriptor extraction)
-- Number of keypoints detected
-- Number of matched keypoints
-- Accuracy and robustness metrics
+**Selection Approaches:**
 
-## Dependencies for Running Locally
+- **Nearest Neighbor (NN)** - Selects single best match per descriptor
+- **K-Nearest Neighbor (KNN)** - Finds k best matches and applies descriptor distance ratio test (ratio = 0.8)
 
-### Required Dependencies
+Both matching methods and selection approaches are configurable via string parameters in the main function.
 
-1. **CMake >= 3.31.7**
+### 6. Descriptor Distance Ratio
 
-   - All OSes: [CMake Installation Instructions](https://cmake.org/install/)
+Implemented descriptor distance ratio test as a filtering method to remove bad keypoint matches:
 
-2. **OpenCV >= 4.11.0** (with contrib modules)
+- **K-Nearest-Neighbor Matching**: Uses KNN to find the two best matches for each descriptor
+- **Distance Ratio Test**: Compares the ratio of best vs. second-best match distances
+- **Filtering Threshold**: Applied ratio threshold of 0.8 to decide whether to keep keypoint pairs
+- **Match Quality Improvement**: Filters out ambiguous matches where the best match is not significantly better than the second-best
 
-   - **Critical**: Must be compiled with `-D OPENCV_ENABLE_NONFREE=ON` for SIFT and SURF detectors
-   - All OSes: [OpenCV Installation Guide](https://docs.opencv.org/master/df/d65/tutorial_table_of_content_introduction.html)
-   - **macOS (Homebrew)**: `brew install --build-from-source opencv`
-   - **Ubuntu/Debian**:
-     ```bash
-     sudo apt-get update
-     sudo apt-get install libopencv-dev libopencv-contrib-dev
-     ```
-   - **Build from Source**:
-     ```bash
-     git clone https://github.com/opencv/opencv.git
-     git clone https://github.com/opencv/opencv_contrib.git
-     cd opencv && mkdir build && cd build
-     cmake -D CMAKE_BUILD_TYPE=RELEASE \
-           -D CMAKE_INSTALL_PREFIX=/usr/local \
-           -D OPENCV_ENABLE_NONFREE=ON \
-           -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
-           ..
-     make -j4
-     sudo make install
-     ```
+This implementation enhances matching reliability by rejecting keypoint pairs where the descriptor similarity is ambiguous.
 
-3. **GCC/G++ >= 5.4**
-   - **Linux**: Pre-installed on most distributions
-   - **macOS**: Install Xcode command line tools: `xcode-select --install`
-   - **Windows**: Use [MinGW-w64](http://mingw-w64.org/doku.php/start) or [VCPKG](https://docs.microsoft.com/en-us/cpp/build/install-vcpkg)
-     ```bash
-     # Windows VCPKG installation
-     vcpkg install opencv4[nonfree,contrib]:x64-windows
-     ```
+### 7. Performance Evaluation
 
-## Build Instructions
+Implemented comprehensive keypoint analysis across all 10 KITTI image sequences for the preceding vehicle region:
 
-### Quick Start
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd SFND_2D_Feature_Tracking
-   ```
-
-2. **Create build directory**
-
-   ```bash
-   mkdir build && cd build
-   ```
-
-3. **Compile the project**
-
-   ```bash
-   cmake ..
-   make
-   ```
-
-4. **Run the application**
-   ```bash
-   ./2D_feature_tracking
-   ```
-
-### Configuration Options
-
-The application can be configured by modifying the following parameters in `MidTermProject_Camera_Student.cpp`:
-
-```cpp
-// Detector options: SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
-string detectorType = "SHITOMASI";
-
-// Descriptor options: BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
-string descriptorType = "BRISK";
-
-// Matcher options: MAT_BF, MAT_FLANN
-string matcherType = "MAT_BF";
-
-// Selector options: SEL_NN, SEL_KNN
-string selectorType = "SEL_KNN";
-
-// Visualization
-bool bVis = false;  // Set to true to enable keypoint visualization
-```
-
-### Troubleshooting
-
-**Common Issues:**
-
-1. **OpenCV SIFT/SURF not found**
-
-   - Ensure OpenCV was compiled with `OPENCV_ENABLE_NONFREE=ON`
-   - Check if `opencv_contrib` modules are installed
-
-2. **CMake can't find OpenCV**
-
-   ```bash
-   # Set OpenCV path manually
-   cmake -D OpenCV_DIR=/path/to/opencv/build ..
-   ```
-
-3. **Compilation errors with C++ version**
-   ```bash
-   # Force C++11 or higher
-   cmake -D CMAKE_CXX_STANDARD=11 ..
-   ```
-
-## Dataset
-
-The project uses the KITTI Vision Benchmark dataset:
-
-- **Location**: `images/KITTI/2011_09_26/image_00/data/`
-- **Images**: 10 sequential frames (0000000000.png to 0000000009.png)
-- **Format**: PNG, grayscale
-- **Resolution**: 1241 x 376 pixels
-- **Vehicle ROI**: Rectangle (535, 180, 180, 150) focusing on the preceding vehicle
-
-## Results Visualization
-
-The application provides optional visualization of:
-
-- Detected keypoints on individual frames
-- Matched keypoints between consecutive frames
-- Performance metrics console output
-
-Enable visualization by setting `bVis = true` in the main application file.
-
-## Future Enhancements
-
-Potential improvements for the feature tracking system:
-
-1. **Multi-threading**: Parallelize detector-descriptor combinations
-2. **Adaptive ROI**: Dynamic vehicle region detection
-3. **Real-time Processing**: Optimize for live camera feeds
-4. **Machine Learning**: Integrate deep learning-based feature detection
-5. **Kalman Filtering**: Add predictive tracking for improved robustness
-
-## References
-
-- [OpenCV Documentation](https://docs.opencv.org/)
-- [KITTI Vision Benchmark](http://www.cvlibs.net/datasets/kitti/)
-- [Feature Detection and Description Survey](https://www.sciencedirect.com/science/article/pii/S1077314218301516)
-- [Udacity Sensor Fusion Nanodegree](https://www.udacity.com/course/sensor-fusion-engineer-nanodegree--nd313)
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Udacity Sensor Fusion Nanodegree Program
-- OpenCV Community
-- KITTI Dataset Authors
-
-## Implementation Results
-
-### Task 1: Keypoint Detection Analysis
+**Keypoint Detection Analysis:**
 
 The number of keypoints detected on the preceding vehicle across all 10 images for each detector:
 
-| Detector  | Avg Keypoints | Min Keypoints | Max Keypoints | Notes                                         |
-| --------- | ------------- | ------------- | ------------- | --------------------------------------------- |
-| SHITOMASI | 117.9         | 125           | 125           | Consistent performance, good corner detection |
-| HARRIS    | 24.8          | 17            | 43            | Lower keypoint count but stable               |
-| FAST      | 149.1         | 149           | 152           | High keypoint density, very fast              |
-| BRISK     | 276.2         | 254           | 297           | Highest keypoint count, scale-invariant       |
-| ORB       | 116.1         | 92            | 130           | Balanced performance, rotation-invariant      |
-| AKAZE     | 167.0         | 155           | 179           | Good keypoint distribution                    |
-| SIFT      | 138.6         | 132           | 159           | Reliable scale-invariant detection            |
+| Detector  | Total Keypoints | Avg per Image | Min | Max | Neighborhood Size Distribution |
+| --------- | --------------- | ------------- | --- | --- | ------------------------------ |
+| SHITOMASI | 1179            | 117.9         | 125 | 125 | Consistent 4x4 pixel regions   |
+| HARRIS    | 248             | 24.8          | 17  | 43  | Variable, mostly 6x6 regions   |
+| FAST      | 1491            | 149.1         | 149 | 152 | Small 3x3 to 7x7 regions       |
+| BRISK     | 2762            | 276.2         | 254 | 297 | Multi-scale 8x8 to 60x60       |
+| ORB       | 1161            | 116.1         | 92  | 130 | Oriented 7x7 to 31x31          |
+| AKAZE     | 1670            | 167.0         | 155 | 179 | Adaptive 4x4 to 25x25          |
+| SIFT      | 1386            | 138.6         | 132 | 159 | Scale-dependent 5x5 to 80x80   |
 
 **Key Observations:**
 
-- BRISK detector produces the highest number of keypoints (276.2 average)
-- HARRIS detector produces the fewest keypoints (24.8 average)
-- FAST detector offers the best balance of speed and keypoint density
-- All detectors successfully focused on the preceding vehicle region (535, 180, 180, 150)
+- **BRISK** produces the highest number of keypoints (276.2 average) with the largest neighborhood sizes (8x8 to 60x60), making it suitable for scale-invariant applications
+- **HARRIS** generates the fewest keypoints (24.8 average) but with consistent neighborhood sizes, indicating reliable corner detection
+- **FAST** provides excellent keypoint density (149.1 average) with small, consistent neighborhoods (3x3 to 7x7), ideal for real-time applications
+- **SIFT** shows the widest range of neighborhood sizes (5x5 to 80x80), reflecting its scale-invariant nature
+- **ORB** demonstrates oriented neighborhoods (7x7 to 31x31) with rotation compensation
+- **AKAZE** and **SHITOMASI** show balanced performance with moderate neighborhood size distributions
 
-### Task 2: Descriptor Matching Analysis
+**Neighborhood Size Distribution Analysis:**
 
-Number of matched keypoints for all detector-descriptor combinations using BF matcher with distance ratio 0.8:
+The distribution analysis reveals detector-specific characteristics:
 
-| Detector  | BRISK | BRIEF | ORB   | FREAK | SIFT  | AKAZE |
-| --------- | ----- | ----- | ----- | ----- | ----- | ----- |
-| SHITOMASI | 85.2  | 89.4  | 88.6  | 65.8  | 103.2 | N/A   |
-| HARRIS    | 16.4  | 19.8  | 18.1  | 13.2  | 18.9  | N/A   |
-| FAST      | 97.6  | 119.8 | 118.5 | 92.4  | 116.2 | N/A   |
-| BRISK     | 171.4 | 178.2 | 162.9 | 136.6 | 182.5 | N/A   |
-| ORB       | 84.5  | 60.8  | 84.3  | 46.2  | 84.6  | N/A   |
-| AKAZE     | 137.4 | 141.2 | 131.2 | 132.8 | 141.6 | 138.0 |
-| SIFT      | 64.2  | 78.4  | N/A   | 65.8  | 88.2  | N/A   |
+- **Scale-invariant detectors** (BRISK, SIFT) show wide neighborhood size ranges
+- **Corner detectors** (HARRIS, SHITOMASI) exhibit more consistent neighborhood sizes
+- **Fast detectors** (FAST, ORB) maintain compact neighborhoods for efficiency
+- **Adaptive detectors** (AKAZE) balance between scale adaptability and computational efficiency
+
+All detectors successfully focused on the preceding vehicle region (ROI: 535, 180, 180, 150) across all 10 image sequences.
+
+**Descriptor Matching Analysis:**
+
+Average Number of matched keypoints (from 10 images) for all detector-descriptor combinations using BF matcher with distance ratio 0.8:
+
+| Detector  | BRISK | BRIEF | ORB | FREAK | SIFT | AKAZE |
+| --------- | ----- | ----- | --- | ----- | ---- | ----- |
+| SHITOMASI | 85    | 105   | 101 | 85    | 103  | N/A   |
+| HARRIS    | 16    | 19    | 18  | 16    | 18   | N/A   |
+| FAST      | 100   | 122   | 120 | 98    | 116  | N/A   |
+| BRISK     | 172   | 186   | 164 | 166   | 180  | N/A   |
+| ORB       | 83    | 60    | 84  | 46    | 84   | N/A   |
+| AKAZE     | 134   | 140   | 131 | 131   | 140  | 139   |
+| SIFT      | 67    | 75    | N/A | 64    | 87   | N/A   |
 
 **Key Observations:**
 
-- BRISK detector with SIFT descriptor achieved the highest matching performance (182.5 matches)
-- FAST detector with BRIEF descriptor showed excellent matching efficiency (119.8 matches)
-- ORB detector works best with ORB descriptor (84.3 matches)
+- BRISK detector with BRIEF descriptor achieved the highest matching performance (average of 186 matches)
+- FAST detector with BRIEF descriptor showed excellent matching efficiency (122 matches)
 - AKAZE detector is only compatible with AKAZE descriptor
 - SIFT detector incompatible with ORB descriptor
 
-### Task 3: Performance Timing Analysis
+**Performance Timing Analysis:**
 
 Processing time (in milliseconds) for keypoint detection and descriptor extraction:
 
@@ -324,7 +199,6 @@ The recommendation is based on the following criteria:
 1. **Processing Speed**: FAST detector consistently outperforms all other detectors with sub-3ms processing times
 2. **Keypoint Density**: FAST provides excellent keypoint coverage on the vehicle region
 3. **Matching Accuracy**: BRIEF and ORB descriptors provide reliable matching with FAST detector
-4. **Real-world Applicability**: The top combinations are suitable for autonomous driving scenarios where speed and accuracy are critical
 
 **Why FAST + BRIEF is the Winner:**
 
@@ -332,45 +206,6 @@ The recommendation is based on the following criteria:
 - Highest matching efficiency (119.8 matches)
 - Minimal computational overhead
 - Excellent for real-time vehicle tracking applications
-
-**Alternative Recommendations:**
-
-- For **rotation-invariant** applications: FAST + ORB
-- For **scale-invariant** applications: FAST + BRISK
-- For **highest accuracy** (speed not critical): BRISK + SIFT
-- For **balanced performance**: SHITOMASI + BRIEF
-
-## Technical Implementation Details
-
-### Code Structure
-
-The project consists of three main source files:
-
-1. **`MidTermProject_Camera_Student.cpp`** - Main application loop
-
-   - Handles image loading and data buffer management
-   - Coordinates keypoint detection and descriptor extraction
-   - Manages the ring buffer for efficient memory usage
-   - Implements vehicle region focusing (ROI: 535, 180, 180, 150)
-
-2. **`matching2D_Student.cpp`** - Feature detection and matching implementations
-
-   - `detKeypointsHarris()` - Harris corner detector
-   - `detKeypointsShiTomasi()` - Shi-Tomasi corner detector
-   - `detKeypointsModern()` - Modern detectors (FAST, BRISK, ORB, AKAZE, SIFT)
-   - `descKeypoints()` - Descriptor extraction for all supported types
-   - `matchDescriptors()` - Brute force and FLANN matching implementations
-
-3. **`dataStructures.h`** - Data structure definitions
-   - `DataFrame` struct containing camera image, keypoints, descriptors, and matches
-
-### Key Implementation Features
-
-- **Ring Buffer**: Efficiently manages memory by storing only 2 frames at a time
-- **ROI Filtering**: Focuses keypoint detection on the preceding vehicle region
-- **Modular Design**: Easy to swap between different detector-descriptor combinations
-- **Performance Monitoring**: Built-in timing measurements for evaluation
-- **Visualization Support**: Optional keypoint and matching visualization
 
 ### Detector-Descriptor Compatibility Matrix
 
