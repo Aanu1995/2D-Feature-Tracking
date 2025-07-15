@@ -1,6 +1,6 @@
 # 2D Feature Tracking
 
-<img src="images/keypoints.png" width="820" height="248" />
+<img src="output/matches.png" width="820" height="248" />
 
 ## Project Overview
 
