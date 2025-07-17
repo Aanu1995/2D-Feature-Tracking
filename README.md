@@ -29,9 +29,9 @@ The primary objective is to build a robust feature tracking system that can:
 - Match keypoints between consecutive frames
 - Evaluate performance metrics to identify the best detector-descriptor combinations
 
-## Project Structure
+## Methodology
 
-The project is organized into seven main components:
+The system employs a comprehensive methodology consisting of seven main components for accurate 2D feature tracking:
 
 ### 1. Data Buffer Optimization
 
