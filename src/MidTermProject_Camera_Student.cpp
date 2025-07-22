@@ -19,8 +19,7 @@
 using namespace std;
 
 /* MAIN PROGRAM */
-int main(int argc, const char *argv[])
-{
+int main(int argc, const char *argv[]) {
 
     /* INIT VARIABLES AND DATA STRUCTURES */
 
@@ -41,12 +40,11 @@ int main(int argc, const char *argv[])
     bool bVis = false;            // visualize results
 
     /* MAIN LOOP OVER ALL IMAGES */
-    for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
-    {
+    for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++) {
         /* LOAD IMAGE INTO BUFFER */
 
         // assemble filenames for current index
-        ostringstream imgNumber;
+        ostringstream imgNumber {};
         imgNumber << setfill('0') << setw(imgFillWidth) << imgStartIndex + imgIndex;
         string imgFullFilename = imgBasePath + imgPrefix + imgNumber.str() + imgFileType;
 
@@ -106,8 +104,8 @@ int main(int argc, const char *argv[])
         if (bLimitKpts) {
             int maxKeypoints = 50;
 
-            if (detectorType.compare("SHITOMASI") == 0)
-            { // there is no response info, so keep the first 50 as they are sorted in descending quality order
+            if (detectorType.compare("SHITOMASI") == 0) {
+                // there is no response info, so keep the first 50 as they are sorted in descending quality order
                 keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
             }
 
@@ -133,8 +131,7 @@ int main(int argc, const char *argv[])
 
         cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
-        if (dataBuffer.size() > 1) // wait until at least two images have been processed
-        {
+        if (dataBuffer.size() > 1) { // wait until at least two images have been processed
 
             /* MATCH KEYPOINT DESCRIPTORS */
 
@@ -155,8 +152,7 @@ int main(int argc, const char *argv[])
 
             // visualize matches between current and previous image
             bVis = true;
-            if (bVis)
-            {
+            if (bVis) {
                 cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
                 cv::drawMatches((dataBuffer.end() - 2)->cameraImg, (dataBuffer.end() - 2)->keypoints,
                                 (dataBuffer.end() - 1)->cameraImg, (dataBuffer.end() - 1)->keypoints,
@@ -170,6 +166,7 @@ int main(int argc, const char *argv[])
                 cout << "Press key to continue to next image" << endl;
                 cv::waitKey(0); // wait for key to be pressed
             }
+
             bVis = false;
         }
 
